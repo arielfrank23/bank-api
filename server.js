@@ -1,7 +1,7 @@
 const express = require('express');
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
-const sequelize = require('./config/db'); // Chemin corrigé selon ta structure
+const sequelize = require('./config/db'); 
 const userController = require('./controllers/userController');
 
 const app = express();
@@ -18,7 +18,7 @@ const swaggerOptions = {
         },
         servers: [
             {
-                url: 'https://bank-api-ariel.onrender.com', // URL de production
+                url: 'https://bank-api-ariel.onrender.com',
                 description: 'Serveur de Production',
             },
             {
@@ -27,14 +27,13 @@ const swaggerOptions = {
             },
         ],
     },
-    // Scanne le fichier actuel et tous les fichiers dans controllers pour la doc
-    apis: ['./server.js', './controllers/*.js'], 
+    apis: ['./server.js'], 
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// --- DOCUMENTATION DES ROUTES (Pour Swagger) ---
+// --- DOCUMENTATION DES ROUTES ---
 
 /**
  * @swagger
@@ -45,12 +44,6 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  * responses:
  * 200:
  * description: Liste récupérée avec succès
- */
-app.get('/users', userController.getUsers);
-
-/**
- * @swagger
- * /users:
  * post:
  * summary: Ajouter un utilisateur
  * tags: [Utilisateurs]
@@ -69,20 +62,21 @@ app.get('/users', userController.getUsers);
  * 201:
  * description: Utilisateur créé
  */
+app.get('/users', userController.getUsers);
 app.post('/users', userController.createUser);
 
-// --- DÉMARRAGE ET CONNEXION ---
-const PORT = process.env.PORT || 3000; // Port dynamique indispensable pour Render
+// --- DÉMARRAGE ---
+const PORT = process.env.PORT || 3000;
 
 async function startServer() {
     try {
         await sequelize.authenticate();
         console.log('✅ Connexion DB réussie.');
         
-        await sequelize.sync(); // Synchronise les modèles avec la DB
+        await sequelize.sync();
 
         app.get('/', (req, res) => {
-            res.send('Bienvenue sur mon API Bancaire ! Allez sur /api-docs pour voir la doc.');
+            res.send('<h1>Bienvenue sur mon API Bancaire !</h1><p>Allez sur <a href="/api-docs">/api-docs</a> pour voir la doc.</p>');
         });
 
         app.listen(PORT, () => {
