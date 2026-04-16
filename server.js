@@ -1,7 +1,7 @@
 const express = require('express');
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
-const sequelize = require('./db'); // Ton fichier de connexion Neon
+const sequelize = require('./config/db'); // On ajoute /config/ devant
 const userController = require('./controllers/userController');
 
 const app = express();
@@ -19,7 +19,7 @@ const swaggerOptions = {
         servers: [
             {
                 url: 'https://bank-api-ariel.onrender.com',
-                description: 'Serveur de Production (Render)'
+                description: 'Serveur de Production'
             },
             {
                 url: 'http://localhost:3000',
