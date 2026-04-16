@@ -7,7 +7,7 @@ const userController = require('./controllers/userController');
 const app = express();
 app.use(express.json());
 
-// --- CONFIGURATION SWAGGER ---
+// --- CONFIGURATION SWAGGER DIRECTE ---
 const swaggerOptions = {
     swaggerDefinition: {
         openapi: '3.0.0',
@@ -20,48 +20,49 @@ const swaggerOptions = {
             {
                 url: 'https://bank-api-ariel.onrender.com',
                 description: 'Serveur de Production',
-            },
-            {
-                url: 'http://localhost:3000',
-                description: 'Serveur Local',
-            },
+            }
         ],
+        // On définit les routes directement ici pour éviter les erreurs de lecture de fichiers
+        paths: {
+            '/users': {
+                get: {
+                    summary: 'Récupérer la liste des utilisateurs',
+                    tags: ['Utilisateurs'],
+                    responses: {
+                        200: { description: 'Succès' }
+                    }
+                },
+                post: {
+                    summary: 'Ajouter un utilisateur',
+                    tags: ['Utilisateurs'],
+                    requestBody: {
+                        required: true,
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        name: { type: 'string' },
+                                        email: { type: 'string' }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    responses: {
+                        201: { description: 'Utilisateur créé' }
+                    }
+                }
+            }
+        }
     },
-    apis: ['./server.js'], 
+    apis: [] // On laisse vide car tout est défini au-dessus
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// --- DOCUMENTATION DES ROUTES ---
-
-/**
- * @swagger
- * /users:
- * get:
- * summary: Récupérer la liste des utilisateurs
- * tags: [Utilisateurs]
- * responses:
- * 200:
- * description: Liste récupérée avec succès
- * post:
- * summary: Ajouter un utilisateur
- * tags: [Utilisateurs]
- * requestBody:
- * required: true
- * content:
- * application/json:
- * schema:
- * type: object
- * properties:
- * name:
- * type: string
- * email:
- * type: string
- * responses:
- * 201:
- * description: Utilisateur créé
- */
+// --- ROUTES ---
 app.get('/users', userController.getUsers);
 app.post('/users', userController.createUser);
 
@@ -72,19 +73,17 @@ async function startServer() {
     try {
         await sequelize.authenticate();
         console.log('✅ Connexion DB réussie.');
-        
         await sequelize.sync();
 
         app.get('/', (req, res) => {
-            res.send('<h1>Bienvenue sur mon API Bancaire !</h1><p>Allez sur <a href="/api-docs">/api-docs</a> pour voir la doc.</p>');
+            res.send('<h1>Serveur Opérationnel</h1><p>Doc disponible sur <a href="/api-docs">/api-docs</a></p>');
         });
 
         app.listen(PORT, () => {
-            console.log(`\n🚀 Serveur : http://localhost:${PORT}`);
-            console.log(`📖 Swagger : http://localhost:${PORT}/api-docs`);
+            console.log(`🚀 Lancé sur le port ${PORT}`);
         });
     } catch (error) {
-        console.error('❌ Erreur de démarrage :', error);
+        console.error('❌ Erreur :', error);
     }
 }
 
