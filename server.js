@@ -40,7 +40,7 @@ const swaggerOptions = {
                                 schema: {
                                     type: 'object',
                                     properties: {
-                                        name: { type: 'string', example: 'Ariel' },
+                                        nom: { type: 'string', example: 'Ariel' }, // Change 'name' en 'nom'
                                         email: { type: 'string', example: 'ariel@gmail.com' },
                                         solde: { type: 'number', example: 1000 }
                                     }
