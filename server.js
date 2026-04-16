@@ -71,7 +71,7 @@ async function startServer() {
     try {
         await sequelize.authenticate();
         console.log('✅ Connexion DB réussie.');
-        await sequelize.sync({ alter: true }); // Applique les changements (comme le passage de nom à name)
+        await sequelize.sync({ alter: true });
         app.listen(PORT, () => console.log(`🚀 Serveur sur le port ${PORT}`));
     } catch (error) {
         console.error('❌ Erreur :', error);
