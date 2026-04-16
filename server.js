@@ -1,7 +1,7 @@
 const express = require('express');
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
-const sequelize = require('./config/db'); // On ajoute /config/ devant
+const sequelize = require('./config/db'); // Chemin corrigé selon ta structure
 const userController = require('./controllers/userController');
 
 const app = express();
@@ -18,7 +18,7 @@ const swaggerOptions = {
         },
         servers: [
             {
-                url: 'https://bank-api-ariel.onrender.com',
+                url: 'https://bank-api-ariel.onrender.com', // URL de production
                 description: 'Serveur de Production',
             },
             {
@@ -27,32 +27,62 @@ const swaggerOptions = {
             },
         ],
     },
-    // On indique à Swagger de regarder dans server.js ET dans tous les fichiers du dossier routes
-    apis: ['./server.js', './routes/*.js'], 
+    // Scanne le fichier actuel et tous les fichiers dans controllers pour la doc
+    apis: ['./server.js', './controllers/*.js'], 
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// --- ROUTES RÉELLES ---
-app.post('/users', userController.createUser);
+// --- DOCUMENTATION DES ROUTES (Pour Swagger) ---
+
+/**
+ * @swagger
+ * /users:
+ * get:
+ * summary: Récupérer la liste des utilisateurs
+ * tags: [Utilisateurs]
+ * responses:
+ * 200:
+ * description: Liste récupérée avec succès
+ */
 app.get('/users', userController.getUsers);
 
-// --- DÉMARRAGE ---
-const PORT = process.env.PORT || 3000;
+/**
+ * @swagger
+ * /users:
+ * post:
+ * summary: Ajouter un utilisateur
+ * tags: [Utilisateurs]
+ * requestBody:
+ * required: true
+ * content:
+ * application/json:
+ * schema:
+ * type: object
+ * properties:
+ * name:
+ * type: string
+ * email:
+ * type: string
+ * responses:
+ * 201:
+ * description: Utilisateur créé
+ */
+app.post('/users', userController.createUser);
+
+// --- DÉMARRAGE ET CONNEXION ---
+const PORT = process.env.PORT || 3000; // Port dynamique indispensable pour Render
 
 async function startServer() {
     try {
-        // Test de la connexion à Neon
         await sequelize.authenticate();
         console.log('✅ Connexion DB réussie.');
+        
+        await sequelize.sync(); // Synchronise les modèles avec la DB
 
-        // Synchronisation des modèles avec la base
-        await sequelize.sync();
-
-        // Route d'accueil pour éviter le "Not Found"
         app.get('/', (req, res) => {
-            res.send('<h1>Bienvenue sur mon API Bancaire !</h1><p>Allez sur <a href="/api-docs">/api-docs</a> pour voir la documentation.</p>');
+            res.send('Bienvenue sur mon API Bancaire ! Allez sur /api-docs pour voir la doc.');
         });
 
         app.listen(PORT, () => {
