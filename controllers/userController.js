@@ -1,8 +1,8 @@
 const User = require('../models/User');
 
-// 1. Ajouter un utilisateur
 exports.createUser = async (req, res) => {
     try {
+        // req.body contiendra maintenant { "name": "...", "email": "..." }
         const user = await User.create(req.body);
         res.status(201).json(user);
     } catch (error) {
@@ -10,7 +10,6 @@ exports.createUser = async (req, res) => {
     }
 };
 
-// 2. Avoir la liste des utilisateurs
 exports.getUsers = async (req, res) => {
     try {
         const users = await User.findAll();
