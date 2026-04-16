@@ -1,57 +1,33 @@
 const express = require('express');
-const sequelize = require('./config/db');
-const userController = require('./controllers/userController');
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+const sequelize = require('./db'); // Ton fichier de connexion Neon
+const userController = require('./controllers/userController');
 
 const app = express();
 app.use(express.json());
 
-// --- CONFIGURATION SWAGGER SÉCURISÉE (Sans commentaires JSDoc fragiles) ---
+// --- CONFIGURATION SWAGGER ---
 const swaggerOptions = {
-  definition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'API de Gestion Bancaire',
-      version: '1.0.0',
-      description: 'Système de gestion des utilisateurs et des transactions',
-    },
-    servers: [{ url: 'http://localhost:3000' }],
-    // On définit les routes ici directement en objet JS
-    paths: {
-      '/users': {
-        get: {
-          summary: 'Récupérer la liste des utilisateurs',
-          tags: ['Users'],
-          responses: {
-            200: { description: 'Succès' }
-          }
+    swaggerDefinition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'API Bancaire Ariel',
+            version: '1.0.0',
+            description: 'Gestion des transactions et utilisateurs',
         },
-        post: {
-          summary: 'Ajouter un utilisateur',
-          tags: ['Users'],
-          requestBody: {
-            required: true,
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    nom: { type: 'string', example: 'Ariel Zebaze' },
-                    email: { type: 'string', example: 'ariel@example.com' }
-                  }
-                }
-              }
-            }
-          },
-          responses: {
-            201: { description: 'Créé' }
-          }
-        }
-      }
-    }
-  },
-  apis: [], // On laisse vide car on a tout défini au-dessus
+        servers: [
+            {
+                url: 'https://bank-api-ariel.onrender.com',
+                description: 'Serveur de Production (Render)'
+            },
+            {
+                url: 'http://localhost:3000',
+                description: 'Serveur Local'
+            },
+        ],
+    },
+    apis: ['./routes/*.js', 'server.js'], // Ajuste selon où sont tes commentaires Swagger
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
@@ -62,20 +38,29 @@ app.post('/users', userController.createUser);
 app.get('/users', userController.getUsers);
 
 // --- DÉMARRAGE ---
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 async function startServer() {
-  try {
-    await sequelize.authenticate();
-    console.log('✅ Connexion DB réussie.');
-    await sequelize.sync();
-    app.listen(PORT, () => {
-      console.log(`\n🚀 Serveur : http://localhost:${PORT}`);
-      console.log(`📖 Swagger : http://localhost:${PORT}/api-docs`);
-    });
-  } catch (error) {
-    console.error('❌ Erreur :', error);
-  }
+    try {
+        // Test de la connexion à Neon
+        await sequelize.authenticate();
+        console.log('✅ Connexion DB réussie.');
+
+        // Synchronisation des modèles avec la base
+        await sequelize.sync();
+
+        // Route d'accueil pour éviter le "Not Found"
+        app.get('/', (req, res) => {
+            res.send('<h1>Bienvenue sur mon API Bancaire !</h1><p>Allez sur <a href="/api-docs">/api-docs</a> pour voir la documentation.</p>');
+        });
+
+        app.listen(PORT, () => {
+            console.log(`\n🚀 Serveur : http://localhost:${PORT}`);
+            console.log(`📖 Swagger : http://localhost:${PORT}/api-docs`);
+        });
+    } catch (error) {
+        console.error('❌ Erreur de démarrage :', error);
+    }
 }
 
 startServer();
