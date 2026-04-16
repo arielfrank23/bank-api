@@ -1,17 +1,14 @@
 const { Sequelize } = require('sequelize');
 
-// On stocke l'URL dans une constante (sans le point-virgule à l'intérieur des guillemets)
-const DATABASE_URL = 'postgresql://neondb_owner:npg_hdH0ts4XcNql@ep-steep-lake-anqgv9on-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
-
-const sequelize = new Sequelize(DATABASE_URL, {
+const sequelize = new Sequelize('postgresql://neondb_owner:ariel5636@ep-steep-lake-anqgv9on-pooler.c-6.us-east-1.aws.neon.tech/neondb?uselibpqcompat=true&sslmode=require', {
     dialect: 'postgres',
     dialectOptions: {
         ssl: {
             require: true,
             rejectUnauthorized: false
-        }
-    },
-    logging: false
+        },
+        connectTimeout: 60000 // Augmente le temps d'attente à 60 secondes
+    }
 });
 
 module.exports = sequelize;
