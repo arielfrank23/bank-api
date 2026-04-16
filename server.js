@@ -19,15 +19,16 @@ const swaggerOptions = {
         servers: [
             {
                 url: 'https://bank-api-ariel.onrender.com',
-                description: 'Serveur de Production'
+                description: 'Serveur de Production',
             },
             {
                 url: 'http://localhost:3000',
-                description: 'Serveur Local'
+                description: 'Serveur Local',
             },
         ],
     },
-    apis: ['./routes/*.js', 'server.js'], // Ajuste selon où sont tes commentaires Swagger
+    // On indique à Swagger de regarder dans server.js ET dans tous les fichiers du dossier routes
+    apis: ['./server.js', './routes/*.js'], 
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
